@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01 | Contexto Territorial</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B3A5C;--navy2:#2B4F76;--steel:#4A6D8C;
+  --light:#E8EEF4;--red:#C0392B;--gold:#D4A017;
+  --green:#27AE60;--orange:#E67E22;--gray:#F4F7FB;--text:#1A1A2E;
+}
+body{font-family:'Trebuchet MS',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--steel);border-radius:4px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+.tab-content{animation:fadeUp .35s ease}
+
+/* HEADER */
+.hdr{background:var(--navy);color:#fff;padding:28px 48px 24px;border-bottom:4px solid var(--gold);display:flex;align-items:baseline;gap:16px}
+.hdr-num{font-size:64px;font-weight:900;line-height:1;font-family:Georgia,serif;color:rgba(255,255,255,.1)}
+.hdr-title{font-size:26px;font-weight:700;letter-spacing:.5px;font-family:Georgia,serif}
+.hdr-sub{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.55);margin-top:3px}
+
+/* TABS */
+.tabs{background:var(--navy2);display:flex;overflow-x:auto}
+.tb{padding:11px 22px;border:none;cursor:pointer;font-size:10px;font-weight:700;letter-spacing:1.5px;white-space:nowrap;
+  color:rgba(255,255,255,.5);background:transparent;border-bottom:3px solid transparent;transition:all .2s;
+  font-family:'Trebuchet MS',sans-serif}
+.tb.active{color:#fff;background:var(--navy);border-bottom:3px solid var(--gold)}
+.tb:hover:not(.active){color:rgba(255,255,255,.8)}
+
+/* CONTENT */
+.cnt{padding:28px 48px}
+.pnl{display:none}
+.pnl.active{display:block}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:24px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.mb24{margin-bottom:24px}
+
+/* CARD */
+.card{background:#fff;border:1px solid var(--light);padding:20px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(27,58,92,.1)}
+
+/* BLOCK TITLE */
+.bt{background:var(--navy);color:#fff;padding:7px 14px;font-size:10px;letter-spacing:2px;
+  font-weight:700;text-transform:uppercase;margin-bottom:14px;font-family:Georgia,serif}
+.bt.gold{background:var(--gold);color:var(--navy)}
+.bt.green{background:var(--green)}
+.bt.orange{background:var(--orange)}
+.bt.red{background:var(--red)}
+.bt.steel{background:var(--steel)}
+
+/* SOURCE */
+.src{font-size:9px;color:#7A8FA6;margin-top:8px;font-style:italic}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:var(--navy);color:#fff}
+thead th{padding:8px 10px;text-align:left;font-size:10px;letter-spacing:1px}
+tbody tr{border-bottom:1px solid var(--light);transition:background .15s}
+tbody tr:hover{background:#EBF0F7!important;cursor:default}
+tbody tr:nth-child(even){background:#F9FBFD}
+td{padding:7px 10px}
+.td-n{font-weight:600;color:var(--navy)}
+.td-c{text-align:center}
+.td-hl{background:#FFF9E6!important;border-left:3px solid var(--gold)!important;font-weight:700}
+
+/* BADGE */
+.badge{border-radius:3px;padding:2px 8px;font-size:9px;font-weight:700;color:#fff;display:inline-block}
+.b-navy{background:var(--navy)}.b-green{background:var(--green)}
+.b-orange{background:var(--orange)}.b-red{background:var(--red)}.b-steel{background:var(--steel)}
+.b-gold{background:var(--gold);color:var(--navy)}
+
+/* INFO */
+.info{background:var(--light);border-left:4px solid var(--navy);padding:16px 20px;margin-bottom:20px}
+.info-t{font-size:10px;font-weight:700;color:var(--navy);letter-spacing:2px;margin-bottom:8px}
+
+/* KPI */
+.kpi{background:var(--light);padding:16px;text-align:center;border-top:3px solid var(--navy);
+  transition:transform .2s,box-shadow .2s;cursor:default}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.kpi-v{font-size:26px;font-weight:800;font-family:Georgia,serif}
+.kpi-l{font-size:10px;font-weight:700;margin-top:4px}
+.kpi-s{font-size:9px;color:var(--steel);margin-top:2px}
+
+/* CHART */
+.cw{position:relative;height:240px}
+.cw-sm{position:relative;height:180px}
+.cw-md{position:relative;height:200px}
+
+/* PROVINCIA CARDS */
+.prov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px}
+.prov-card{background:#fff;border:1px solid var(--light);border-top:5px solid var(--navy);
+  padding:0;overflow:hidden;transition:box-shadow .25s,transform .2s;cursor:pointer}
+.prov-card:hover{box-shadow:0 6px 24px rgba(27,58,92,.15);transform:translateY(-2px)}
+.prov-card.active{box-shadow:0 0 0 2px var(--gold),0 6px 24px rgba(212,160,23,.2)}
+.prov-head{background:var(--navy);color:#fff;padding:14px 18px}
+.prov-flag{font-size:28px;margin-bottom:4px}
+.prov-name{font-size:14px;font-weight:700;font-family:Georgia,serif}
+.prov-sub{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-top:2px}
+.prov-body{padding:16px 18px}
+.prov-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+  border-bottom:1px solid var(--light);font-size:10px}
+.prov-stat:last-child{border:none}
+.prov-stat-v{font-weight:700;color:var(--navy);font-size:11px}
+.prov-bar-wrap{margin-top:12px}
+.prov-bar-label{font-size:9px;color:var(--steel);margin-bottom:4px;display:flex;justify-content:space-between}
+.prov-bar-track{background:var(--light);border-radius:20px;height:8px;overflow:hidden}
+.prov-bar{height:100%;border-radius:20px;transition:width 1.2s ease}
+
+/* FLUJO CADENA */
+.flujo{display:flex;align-items:stretch;gap:0;margin-bottom:24px;overflow-x:auto}
+.flujo-step{flex:1;min-width:160px;background:#fff;border:1px solid var(--light);padding:18px 16px;
+  position:relative;transition:box-shadow .2s}
+.flujo-step:not(:last-child)::after{content:'→';position:absolute;right:-14px;top:50%;
+  transform:translateY(-50%);font-size:22px;color:var(--gold);font-weight:700;z-index:2;
+  background:#fff;padding:0 2px}
+.flujo-step:hover{box-shadow:0 4px 14px rgba(27,58,92,.12);z-index:1}
+.flujo-num{font-size:9px;font-weight:700;color:var(--steel);letter-spacing:2px;margin-bottom:6px}
+.flujo-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px;font-family:Georgia,serif}
+.flujo-val{font-size:18px;font-weight:800;color:var(--gold);font-family:Georgia,serif;margin-top:8px}
+.flujo-desc{font-size:10px;color:#555;line-height:1.6}
+
+/* DEMANDA VISUAL */
+.demanda-donut-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+.demanda-legend{display:flex;flex-direction:column;gap:12px}
+.dl-item{display:flex;align-items:center;gap:12px}
+.dl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.dl-name{font-size:11px;font-weight:700;color:var(--navy)}
+.dl-pct{font-size:20px;font-weight:900;font-family:Georgia,serif}
+.dl-sub{font-size:9px;color:var(--steel);margin-top:1px}
+
+/* GRUPO ETARIO */
+.grupo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.grupo{background:#fff;border:1px solid var(--light);padding:18px;text-align:center;
+  border-top:3px solid var(--navy);transition:all .2s}
+.grupo:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(27,58,92,.1)}
+.grupo-pct{font-size:36px;font-weight:900;color:var(--gold);font-family:Georgia,serif;line-height:1}
+.grupo-edad{font-size:11px;font-weight:700;color:var(--navy);margin-top:6px}
+.grupo-name{font-size:10px;color:var(--steel);margin-top:3px}
+.grupo-desc{font-size:10px;color:#555;line-height:1.65;margin-top:8px}
+
+/* NORMATIVA ITEM */
+.norma-item{background:#fff;border:1px solid var(--light);border-left:4px solid var(--gold);
+  padding:14px 18px;margin-bottom:10px;transition:box-shadow .2s}
+.norma-item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.norma-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.norma-org{font-size:10px;font-weight:700;color:var(--navy);letter-spacing:1px}
+.norma-tag{font-size:11px;font-weight:800;color:var(--gold);font-family:Georgia,serif}
+.norma-desc{font-size:10px;color:#555;line-height:1.65}
+
+/* VARIABLE CARDS */
+.var-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.var-card{background:#fff;border:1px solid var(--light);padding:18px;text-align:center;
+  border-radius:4px;transition:all .2s;cursor:default}
+.var-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(27,58,92,.12)}
+.var-icon{font-size:32px;margin-bottom:10px}
+.var-name{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.var-text{font-size:10px;color:#555;line-height:1.65}
+.var-border{border-top:3px solid var(--navy)}
+
+/* CONCL */
+.concl{background:var(--navy);color:#fff;padding:20px;border-radius:4px;margin-top:24px}
+.concl-t{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:12px}
+.concl-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:11px;line-height:1.7}
+.concl-st{color:var(--gold);font-weight:700;margin-bottom:5px;font-size:12px}
+
+/* MAPA CONCEPTUAL */
+.mapa-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+  gap:8px;align-items:center;margin-bottom:24px;overflow-x:auto}
+.mapa-nodo{background:var(--navy);color:#fff;padding:14px 12px;text-align:center;
+  border-radius:4px;min-width:120px}
+.mapa-nodo.gold{background:var(--gold);color:var(--navy)}
+.mapa-nodo.green{background:var(--green)}
+.mapa-nodo.orange{background:var(--orange)}
+.mapa-nodo-title{font-size:11px;font-weight:700;font-family:Georgia,serif}
+.mapa-nodo-val{font-size:18px;font-weight:900;font-family:Georgia,serif;margin-top:4px}
+.mapa-nodo-sub{font-size:8px;letter-spacing:1px;opacity:.8;margin-top:3px}
+.mapa-arrow{font-size:24px;color:var(--gold);font-weight:700;text-align:center}
+
+/* CRECIMIENTO TABLA */
+.crec-prov{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--light)}
+.crec-prov:last-child{border:none}
+.crec-name{font-size:11px;font-weight:700;color:var(--navy);width:140px;flex-shrink:0}
+.crec-bar-track{flex:1;background:var(--light);border-radius:20px;height:10px;overflow:hidden}
+.crec-bar{height:100%;border-radius:20px}
+.crec-val{font-size:11px;font-weight:700;color:var(--navy);width:60px;text-align:right;flex-shrink:0}
+.crec-rate{font-size:9px;color:var(--steel);width:60px;text-align:right;flex-shrink:0}
+
+/* PDOT TABLE STYLE */
+.pdot-wrap{background:#fff;border:1px solid var(--light);overflow:hidden}
+
+/* FOOTER */
+.ftr{background:#EEF2F6;border-top:2px solid var(--navy);padding:16px 48px}
+.ftr-t{font-size:9px;color:var(--steel);font-weight:700;letter-spacing:2px;margin-bottom:6px}
+.ftr-r{display:grid;grid-template-columns:1fr 1fr;gap:2px 32px;font-size:9px;color:#5A6E82;line-height:1.8}
+
+@media(max-width:900px){
+  .cnt,.hdr,.ftr{padding:16px 20px}
+  .g2,.g3,.g4,.prov-grid,.grupo-grid,.var-grid,.concl-g,.mapa-grid{grid-template-columns:1fr}
+  .flujo{flex-direction:column}
+  .flujo-step::after{display:none}
+  .mapa-arrow{display:none}
+  .demanda-donut-wrap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <span class="hdr-num">01</span>
+  <div>
+    <div class="hdr-title">CONTEXTO TERRITORIAL</div>
+    <div class="hdr-sub">DIAGNÓSTICO · POBLACIÓN · PROYECCIÓN DE DEMANDA EDUCATIVA · NORMATIVA PUGS</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tb active" onclick="switchTab(0)">1.1 Diagnóstico Poblacional</button>
+  <button class="tb" onclick="switchTab(1)">1.2 Proyección INEC</button>
+  <button class="tb" onclick="switchTab(2)">1.3 Distribución Demanda</button>
+  <button class="tb" onclick="switchTab(3)">1.4 Normativa PUGS</button>
+  <button class="tb" onclick="switchTab(4)">1.5 Cadena Lógica</button>
+</div>
+
+<div class="cnt">
+
+<!-- ══ 1.1 DIAGNÓSTICO POBLACIONAL ══ -->
+<div class="pnl active tab-content" id="tab-0">
+
+  <!-- KPIs -->
+  <div class="g4">
+    <div class="kpi" style="border-top-color:var(--navy)">
+      <div class="kpi-v" style="color:var(--navy)" data-target="1221695" data-int="1">0</div>
+      <div class="kpi-l">Habitantes Zona 6 (2022)</div>
+      <div class="kpi-s">Azuay + Cañar + Morona Santiago · INEC Censo 2022</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--gold)">
+      <div class="kpi-v" style="color:var(--gold)" data-target="195753" data-int="1">0</div>
+      <div class="kpi-l">Jóvenes 17–25 años (2022)</div>
+      <div class="kpi-s">Cohorte objetivo · INEC proyecciones 2022</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--green)">
+      <div class="kpi-v" style="color:var(--green)" data-target="203577" data-int="1">0</div>
+      <div class="kpi-l">Jóvenes 17–25 proyectados (2030)</div>
+      <div class="kpi-s">Crecimiento 0,49%/año · INEC EPP Rev. 2024</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--orange)">
+      <div class="kpi-v" style="color:var(--orange)" data-target="0.49" data-dec="2">0</div>
+      <div class="kpi-l">Tasa anual crecimiento 17–25</div>
+      <div class="kpi-s">Tasa agregada Zona 6 (2022–2030)</div>
+    </div>
+  </div>
+
+  <!-- GRUPOS ETARIOS -->
+  <div class="card mb24">
+    <div class="bt">Caracterización de la demanda estudiantil — clasificación por grupo etario</div>
+    <div class="grupo-grid">
+      <div class="grupo" style="border-top-color:var(--navy)">
+        <div class="grupo-pct">35%</div>
+        <div class="grupo-edad">17–19 años</div>
+        <div class="grupo-name">Ingreso Inicial</div>
+        <div class="grupo-desc">Bachilleres que acceden por primera vez a la educación superior técnica o universitaria. Máxima predisposición a formación técnica si existe oferta accesible y gratuita. Captación prioritaria del proyecto.</div>
+      </div>
+      <div class="grupo" style="border-top-color:var(--gold)">
+        <div class="grupo-pct">40%</div>
+        <div class="grupo-edad">20–22 años</div>
+        <div class="grupo-name">Formación Universitaria</div>
+        <div class="grupo-desc">Grupo mayoritario. Cursando carreras de 4–5 períodos. Alta tasa de abandono en primeros semestres cuando la carrera no responde a expectativas laborales. Potencial de reconversión hacia tecnológicos.</div>
+      </div>
+      <div class="grupo" style="border-top-color:var(--orange)">
+        <div class="grupo-pct">25%</div>
+        <div class="grupo-edad">23–25 años</div>
+        <div class="grupo-name">Acceso Tardío / Continuidad</div>
+        <div class="grupo-desc">Jóvenes que trabajan y estudian simultáneamente o que retoman estudios interrumpidos. Perfil prioritario para jornada nocturna y modalidad dual. Sector con alta demanda en institutos técnicos.</div>
+      </div>
+    </div>
+    <p class="src"><strong>Fuente:</strong> SENESCYT — Datos de postulación y matrícula 2022; Dirección de Planificación, GAD Municipal de Cuenca; elaboración propia</p>
+  </div>
+
+  <!-- Provincias interactivas -->
+  <div class="card mb24">
+    <div class="bt">Perfil por provincia — haz clic para explorar</div>
+    <div class="prov-grid" id="provGrid"></div>
+    <div id="provDetail" style="display:none;background:var(--light);border-left:4px solid var(--gold);
+      padding:16px 20px;margin-top:4px;animation:fadeUp .25s ease">
+    </div>
+    <p class="src"><strong>Fuente:</strong> INEC — Estimaciones y Proyecciones de Población, Revisión 2024; Censo de Población y Vivienda 2022; cuenca.gob.ec (Dirección de Planificación)</p>
+  </div>
+
+  <!-- Interpretación -->
+  <div class="info">
+    <div class="info-t">DIAGNÓSTICO GENERAL — ZONA 6</div>
+    <p style="font-size:11px;line-height:1.8">
+      La Zona 6 concentra <strong>1.221.695 habitantes</strong> distribuidos en tres provincias con perfiles demográficos distintos.
+      <strong>Azuay</strong> —con Cuenca como nodo urbano principal— agrupa al 65,6% de la población total y concentra la mayor demanda estudiantil.
+      <strong>Morona Santiago</strong> lidera el crecimiento relativo del grupo 17–25 (tasa 0,68%/año) pese a ser la provincia con menor oferta de educación superior.
+      <strong>Cañar</strong> presenta crecimiento moderado (0,32%/año) con alta dependencia del nodo de Cuenca.
+      Esta distribución asimétrica entre concentración poblacional y oferta educativa define la necesidad estructural de un campus técnico interprovincial.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 1.2 PROYECCIÓN INEC ══ -->
+<div class="pnl tab-content" id="tab-1">
+
+  <!-- Tabla proyección -->
+  <div class="card mb24">
+    <div class="bt">Proyección INEC — crecimiento poblacional 17–25 años por provincia</div>
+    <table>
+      <thead><tr>
+        <th>Provincia</th><th>Pob. total 2022</th><th>Est. 17–25 en 2022</th>
+        <th>Escenario 17–25 en 2030</th><th>Tasa anual 2022–2030</th>
+        <th>Nivel confianza</th><th>Peso en Zona 6</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="td-n">Azuay</td><td>801.609</td><td>126.895</td><td>131.929</td>
+          <td><span class="badge b-navy">0,49%</span></td><td>Media-alta</td>
+          <td><span class="badge b-gold">64,8%</span></td>
+        </tr>
+        <tr>
+          <td class="td-n">Cañar</td><td>227.578</td><td>34.592</td><td>35.473</td>
+          <td><span class="badge b-steel">0,32%</span></td><td>Media</td>
+          <td><span class="badge b-steel">17,7%</span></td>
+        </tr>
+        <tr>
+          <td class="td-n">Morona Santiago</td><td>192.508</td><td>34.266</td><td>36.175</td>
+          <td><span class="badge b-orange">0,68%</span></td><td>Media-baja</td>
+          <td><span class="badge b-steel">17,5%</span></td>
+        </tr>
+        <tr class="td-hl">
+          <td>ZONA 6 (total)</td><td>1.221.695</td><td>195.753</td><td>203.577</td>
+          <td><span class="badge b-gold">0,49% aprox.</span></td><td>Mixta</td>
+          <td><span class="badge b-gold">100%</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="src"><strong>Fuente:</strong> INEC — Estimaciones y Proyecciones de Población, Revisión 2024 (EPP Rev. 2024); Censo de Población y Vivienda Ecuador 2022; Dirección de Planificación GAD Cuenca / ONU Habitat, 2019</p>
+  </div>
+
+  <!-- Gráfico de proyección -->
+  <div class="g2">
+    <div class="card">
+      <div class="bt">Proyección 17–25 años por provincia — 2022 a 2035</div>
+      <div class="cw"><canvas id="chProyeccion"></canvas></div>
+      <p class="src"><strong>Fuente:</strong> INEC EPP Revisión 2024 — proyecciones quinquenales provincias Zona 6</p>
+    </div>
+    <div class="card">
+      <div class="bt">Comparación crecimiento relativo — tasa anual por provincia</div>
+      <div class="card" style="border:none;padding:0;box-shadow:none">
+        <div class="cw"><canvas id="chTasas"></canvas></div>
+      </div>
+      <p class="src"><strong>Fuente:</strong> INEC EPP Revisión 2024; Morona Santiago: mayor tasa de fecundidad Zona 6 (2,5 hijos/mujer · INEC 2024)</p>
+    </div>
+  </div>
+
+  <!-- Barras comparativas crecimiento absoluto -->
+  <div class="card mb24">
+    <div class="bt gold">Crecimiento absoluto proyectado grupo 17–25 — 2022 a 2030</div>
+    <div style="padding:8px 0">
+      <div class="crec-prov">
+        <div class="crec-name">Azuay</div>
+        <div class="crec-bar-track">
+          <div class="crec-bar" style="width:100%;background:var(--navy)"></div>
+        </div>
+        <div class="crec-val">+5.034</div>
+        <div class="crec-rate">0,49%/año</div>
+      </div>
+      <div class="crec-prov">
+        <div class="crec-name">Morona Santiago</div>
+        <div class="crec-bar-track">
+          <div class="crec-bar" style="width:38%;background:var(--orange)"></div>
+        </div>
+        <div class="crec-val">+1.909</div>
+        <div class="crec-rate">0,68%/año ↑</div>
+      </div>
+      <div class="crec-prov">
+        <div class="crec-name">Cañar</div>
+        <div class="crec-bar-track">
+          <div class="crec-bar" style="width:17%;background:var(--steel)"></div>
+        </div>
+        <div class="crec-val">+881</div>
+        <div class="crec-rate">0,32%/año</div>
+      </div>
+      <div class="crec-prov" style="border-top:2px solid var(--gold);margin-top:4px;padding-top:10px">
+        <div class="crec-name" style="color:var(--gold);font-weight:800">ZONA 6 TOTAL</div>
+        <div class="crec-bar-track">
+          <div class="crec-bar" style="width:100%;background:var(--gold)"></div>
+        </div>
+        <div class="crec-val" style="color:var(--gold)">+7.824</div>
+        <div class="crec-rate" style="color:var(--gold)">neto 2022→2030</div>
+      </div>
+    </div>
+    <p class="src"><strong>Fuente:</strong> Cálculo propio — diferencia entre escenario 2030 y estimación 2022; INEC EPP Revisión 2024</p>
+  </div>
+
+  <!-- Interpretación -->
+  <div class="info">
+    <div class="info-t">INTERPRETACIÓN — DINÁMICA DEMOGRÁFICA ZONA 6</div>
+    <p style="font-size:11px;line-height:1.8">
+      Aunque <strong>Azuay concentra el mayor crecimiento absoluto</strong> (+5.034 jóvenes al 2030),
+      <strong>Morona Santiago lidera el crecimiento relativo</strong> con la tasa más alta de la zona (0,68%/año),
+      impulsada por su tasa de fecundidad de 2,5 hijos por mujer — la única que supera el nivel de reemplazo en la Zona 6.
+      Esto genera una presión creciente sobre la oferta de educación superior en la región amazónica,
+      que actualmente no cuenta con ningún campus técnico-tecnológico de envergadura.
+      La tendencia de crecimiento sostenido del grupo 17–25 <strong>justifica el diseño de un campus con capacidad de expansión</strong>
+      a lo largo de su vida útil (12–20 años).
+    </p>
+  </div>
+</div>
+
+<!-- ══ 1.3 DISTRIBUCIÓN DEMANDA ══ -->
+<div class="pnl tab-content" id="tab-2">
+
+  <div class="g2">
+    <!-- Donut + leyenda -->
+    <div class="card">
+      <div class="bt">Distribución de la demanda potencial 17–25 — Zona 6 (2022)</div>
+      <div class="demanda-donut-wrap">
+        <div class="cw-md"><canvas id="chDistrib"></canvas></div>
+        <div class="demanda-legend">
+          <div class="dl-item">
+            <div class="dl-dot" style="background:var(--navy)"></div>
+            <div>
+              <div class="dl-pct" style="color:var(--navy)">64,8%</div>
+              <div class="dl-name">Azuay — Cuenca</div>
+              <div class="dl-sub">126.895 jóvenes · Nodo principal</div>
+            </div>
+          </div>
+          <div class="dl-item">
+            <div class="dl-dot" style="background:var(--steel)"></div>
+            <div>
+              <div class="dl-pct" style="color:var(--steel)">17,7%</div>
+              <div class="dl-name">Cañar</div>
+              <div class="dl-sub">34.592 jóvenes · Nodo secundario</div>
+            </div>
+          </div>
+          <div class="dl-item">
+            <div class="dl-dot" style="background:var(--orange)"></div>
+            <div>
+              <div class="dl-pct" style="color:var(--orange)">17,5%</div>
+              <div class="dl-name">Morona Santiago</div>
+              <div class="dl-sub">34.266 jóvenes · Mayor crecimiento relativo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="src"><strong>Fuente:</strong> INEC — Estimaciones y Proyecciones de Población Revisión 2024; elaboración propia</p>
+    </div>
+
+    <!-- Concentración y cobertura -->
+    <div class="card">
+      <div class="bt">Concentración de demanda vs. oferta educativa — desequilibrio territorial</div>
+      <div class="cw-md"><canvas id="chDesequilibrio"></canvas></div>
+      <p class="src"><strong>Fuente:</strong> SENESCYT oferta académica Zona 6 2022 (14 IES: 7 Azuay, 5 Cañar, 2 Morona Santiago); INEC 2022</p>
+    </div>
+  </div>
+
+  <!-- Tabla de concentración -->
+  <div class="card mb24">
+    <div class="bt">Desequilibrio territorial — demanda estudiantil vs. instituciones de educación superior</div>
+    <table>
+      <thead><tr>
+        <th>Provincia</th><th>Jóvenes 17–25 (2022)</th><th>% Demanda</th>
+        <th>IES presentes</th><th>% IES Zona 6</th><th>Ratio jóvenes/IES</th><th>Evaluación</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="td-n">Azuay (Cuenca)</td><td>126.895</td><td>64,8%</td>
+          <td>14 (7 univ. + 7 tec.)</td><td>53,8%</td>
+          <td><span class="badge b-green">9.064 jóv./IES</span></td>
+          <td><span class="badge b-green">MEJOR CUBIERTA</span></td>
+        </tr>
+        <tr>
+          <td class="td-n">Cañar</td><td>34.592</td><td>17,7%</td>
+          <td>7 (2 univ. + 5 tec.)</td><td>26,9%</td>
+          <td><span class="badge b-orange">4.942 jóv./IES</span></td>
+          <td><span class="badge b-orange">COBERTURA PARCIAL</span></td>
+        </tr>
+        <tr>
+          <td class="td-n">Morona Santiago</td><td>34.266</td><td>17,5%</td>
+          <td>5 (1 univ. + 4 tec.)</td><td>19,2%</td>
+          <td><span class="badge b-red">6.853 jóv./IES</span></td>
+          <td><span class="badge b-red">DÉFICIT CRÍTICO</span></td>
+        </tr>
+        <tr class="td-hl">
+          <td>ZONA 6 TOTAL</td><td>195.753</td><td>100%</td>
+          <td>26 instituciones</td><td>100%</td>
+          <td><span class="badge b-gold">7.529 jóv./IES</span></td>
+          <td><span class="badge b-gold">DESEQUILIBRIO</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="src"><strong>Fuente:</strong> SENESCYT — Oferta académica vigente Zona 6, 2022; El Mercurio Cuenca, oct. 2022 (35 carreras técnicas / 7 institutos); INEC 2022</p>
+  </div>
+
+  <!-- Características demanda -->
+  <div class="g3">
+    <div style="background:#fff;border:1px solid var(--light);border-top:3px solid var(--navy);padding:18px">
+      <div style="font-size:10px;font-weight:700;color:var(--navy);letter-spacing:2px;margin-bottom:10px">📍 CONCENTRACIÓN</div>
+      <p style="font-size:11px;line-height:1.75">Cuenca actúa como <strong>nodo principal</strong> de la demanda estudiantil interprovincial. Los jóvenes de Cañar y Morona Santiago se desplazan a Cuenca por la escasez de oferta local. Esta movilidad involuntaria evidencia la necesidad de ampliar la cobertura territorial del sistema técnico.</p>
+    </div>
+    <div style="background:#fff;border:1px solid var(--light);border-top:3px solid var(--orange);padding:18px">
+      <div style="font-size:10px;font-weight:700;color:var(--orange);letter-spacing:2px;margin-bottom:10px">⚠️ COBERTURA DESIGUAL</div>
+      <p style="font-size:11px;line-height:1.75">Morona Santiago concentra el <strong>17,5% de la demanda</strong> pero solo el <strong>19,2% de las IES</strong>, con carreras técnicas prácticamente inexistentes. Pese a ello, su tasa de crecimiento del grupo 17–25 (0,68%/año) es la más alta de la zona, lo que agravará el déficit si no se interviene.</p>
+    </div>
+    <div style="background:#fff;border:1px solid var(--light);border-top:3px solid var(--green);padding:18px">
+      <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:2px;margin-bottom:10px">📈 TENDENCIA</div>
+      <p style="font-size:11px;line-height:1.75">El crecimiento sostenido del grupo 17–25 en las tres provincias, combinado con la baja tasa de cobertura técnico-tecnológica actual (solo 35 carreras en 7 institutos), genera una <strong>presión estructural creciente</strong> que justifica la creación de nueva infraestructura educativa.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 1.4 NORMATIVA PUGS ══ -->
+<div class="pnl tab-content" id="tab-3">
+
+  <div class="info mb24">
+    <div class="info-t">MARCO NORMATIVO APLICABLE — TIPOLOGÍA Y ESCALA</div>
+    <p style="font-size:11px;line-height:1.8">
+      El proyecto se inscribe en el sistema de equipamientos del <strong>Plan de Uso y Gestión del Suelo (PUGS)</strong> del GAD Municipal de Cuenca,
+      elaborado conjuntamente con <strong>ONU Hábitat</strong> (2019). Este instrumento normativo clasifica los equipamientos educativos según su escala,
+      área de influencia y población base, determinando condiciones de localización, accesibilidad y lote mínimo.
+      Como campus técnico-tecnológico de cobertura interprovincial, el proyecto se clasifica en la <strong>tipología de nivel zonal</strong>,
+      la más alta dentro del sistema cantonal de Cuenca.
+    </p>
+  </div>
+
+  <!-- Normativa items -->
+  <div class="g2">
+    <div>
+      <div class="norma-item">
+        <div class="norma-head">
+          <div class="norma-org">🏛️ PUGS — GAD CUENCA / ONU HABITAT (2019)</div>
+          <div class="norma-tag">Tabla 29</div>
+        </div>
+        <div class="norma-desc">
+          Normativa de Equipamiento de Educación. Define los tipos: Campus Universitario, Centro Internacional de Posgrados,
+          Centro de Investigación y Centro de Capacidad Especializada. Todos en escala <strong>ZONAL</strong> con radio de influencia NACIONAL.
+          Regulado por CEAACES y el Consejo de Educación Superior (CES).
+        </div>
+      </div>
+      <div class="norma-item">
+        <div class="norma-head">
+          <div class="norma-org">📋 PDOT CUENCA — SISTEMA EQUIPAMIENTOS EDUCACIÓN</div>
+          <div class="norma-tag">Tabla 14</div>
+        </div>
+        <div class="norma-desc">
+          Sistema de Equipamientos de Educación: Campus Universitario e Instituto Tecnológico se clasifican como equipamientos
+          de <strong>escala ZONAL</strong>. Directriz del CES: Mantener campus universitario activo. Usos permitidos: docencia, investigación,
+          vinculación y servicios de bienestar. Área urbana concentrada y subcentros zonales.
+        </div>
+      </div>
+      <div class="norma-item">
+        <div class="norma-head">
+          <div class="norma-org">⚖️ LOES — LEY ORGÁNICA EDUCACIÓN SUPERIOR (2022)</div>
+          <div class="norma-tag">Art. 118 / Art. 356</div>
+        </div>
+        <div class="norma-desc">
+          Los institutos superiores tecnológicos otorgan títulos de tercer nivel tecnológico (4.500 h / 5–6 períodos).
+          Gratuidad constitucional en el sistema público. Acceso directo para bachilleres técnicos (Art. 19.1).
+          Regulación del CES — Reglamento Régimen Académico: mínimo 40% horas prácticas para nivel tecnológico.
+        </div>
+      </div>
+      <div class="norma-item">
+        <div class="norma-head">
+          <div class="norma-org">🏗️ ACUERDO MINISTERIAL — MinEduc N° 0483-12 (2021)</div>
+          <div class="norma-tag">Infraestructura</div>
+        </div>
+        <div class="norma-desc">
+          Normas Técnicas y Estándares de Infraestructura Educativa Ecuador (2021). Define los criterios de diseño para establecimientos
+          de educación superior pública: dimensiones mínimas de aulas (72 m² para 40 estudiantes), laboratorios (2,0 m²/est.),
+          accesibilidad universal, seguridad estructural y equipamiento mínimo obligatorio.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- Tabla tipología PUGS -->
+      <div class="card">
+        <div class="bt">Tipología de equipamientos educativos — PUGS Cuenca 2019</div>
+        <table>
+          <thead><tr>
+            <th>Nivel de servicio</th><th>Tipo</th><th>Radio de influencia</th><th>Lote mínimo</th>
+          </tr></thead>
+          <tbody>
+            <tr><td rowspan="4" style="font-weight:700;color:var(--navy);vertical-align:middle;border-right:2px solid var(--light)">ZONAL</td>
+              <td>Campus Universitario</td><td>Nacional</td><td>—</td></tr>
+            <tr><td>Centro Internacional de Posgrados</td><td>Nacional</td><td>—</td></tr>
+            <tr><td>Centro de Investigación</td><td>Nacional</td><td>—</td></tr>
+            <tr class="td-hl"><td><strong>Centro de Capacidad Especializada ← PROYECTO</strong></td><td>Nacional</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:9px;color:var(--steel);margin-top:8px">Regulado por CEAACES (Consejo de Evaluación, Acreditación y Aseguramiento de la Calidad de la Educación Superior)</p>
+        <p class="src"><strong>Fuente:</strong> PUGS — GAD Cuenca / ONU Habitat, 2019, Tabla 29; PDOT Cuenca actualización 2021</p>
+      </div>
+
+      <!-- Clasificación proyecto -->
+      <div class="card" style="margin-top:16px;border-top:4px solid var(--gold)">
+        <div class="bt gold">Clasificación del proyecto propuesto</div>
+        <table>
+          <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td class="td-n">Tipología PUGS</td><td>Centro de Capacidad Especializada — Nivel Zonal</td></tr>
+            <tr><td class="td-n">Radio de influencia</td><td>Interprovincial (Azuay, Cañar, Morona Santiago)</td></tr>
+            <tr><td class="td-n">Jerarquía</td><td>Equipamiento de nivel superior — mayor escala</td></tr>
+            <tr><td class="td-n">Tipo de acceso</td><td>Alta accesibilidad multimodal requerida</td></tr>
+            <tr><td class="td-n">Localización preferente</td><td>Nodos urbanos con conectividad vial principal</td></tr>
+            <tr><td class="td-n">Organismo regulador</td><td>CES — Consejo de Educación Superior</td></tr>
+            <tr class="td-hl"><td class="td-n">Capacidad PRETT aplicable</td><td>Meta campus: 600–1.000 estudiantes (fase madura)</td></tr>
+          </tbody>
+        </table>
+        <p class="src"><strong>Fuente:</strong> PUGS Cuenca 2019; CES — Reglamento Régimen Académico; SENESCYT PRETT 2021</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 1.5 CADENA LÓGICA ══ -->
+<div class="pnl tab-content" id="tab-4">
+
+  <!-- Cadena visual -->
+  <div class="card mb24">
+    <div class="bt gold">Cadena lógica del análisis territorial — POBLACIÓN → NECESIDAD DE EQUIPAMIENTO</div>
+    <div class="flujo">
+      <div class="flujo-step">
+        <div class="flujo-num">PASO 01</div>
+        <div class="flujo-title">Población</div>
+        <div class="flujo-desc">Base demográfica del territorio — grupo objetivo 17–25 años en la Zona 6</div>
+        <div class="flujo-val">195.753</div>
+        <div style="font-size:9px;color:var(--steel)">jóvenes · INEC 2022</div>
+      </div>
+      <div class="flujo-step">
+        <div class="flujo-num">PASO 02</div>
+        <div class="flujo-title">Demanda</div>
+        <div class="flujo-desc">Aspirantes a educación superior técnico-tecnológica en la región (tasa 32%)</div>
+        <div class="flujo-val">62.641</div>
+        <div style="font-size:9px;color:var(--steel)">candidatos técnicos · CEPAL 2019</div>
+      </div>
+      <div class="flujo-step">
+        <div class="flujo-num">PASO 03</div>
+        <div class="flujo-title">Déficit</div>
+        <div class="flujo-desc">Brecha entre demanda potencial y capacidad instalada de institutos técnicos</div>
+        <div class="flujo-val">153.697</div>
+        <div style="font-size:9px;color:var(--steel)">sin cupo técnico nac. · PRETT 2021</div>
+      </div>
+      <div class="flujo-step">
+        <div class="flujo-num">PASO 04</div>
+        <div class="flujo-title">Necesidad</div>
+        <div class="flujo-desc">Justificación funcional y normativa del nuevo equipamiento educativo</div>
+        <div class="flujo-val">1 campus</div>
+        <div style="font-size:9px;color:var(--steel)">técnico-tecnológico interprovincial</div>
+      </div>
+      <div class="flujo-step" style="border-top:3px solid var(--gold)">
+        <div class="flujo-num">RESULTADO</div>
+        <div class="flujo-title">Equipamiento</div>
+        <div class="flujo-desc">Proyecto arquitectónico: campus técnico multi-área con 6 programas y cobertura Zona 6</div>
+        <div class="flujo-val">≥9 m²/est.</div>
+        <div style="font-size:9px;color:var(--steel)">estándar mínimo diseño (FEUP / Tec. Mty)</div>
+      </div>
+    </div>
+    <p class="src"><strong>Fuente:</strong> INEC 2022; CEPAL 2019; SENESCYT PRETT 2021; MINEDU Perú RVM 140-2021; Open House Porto 2024 (FEUP)</p>
+  </div>
+
+  <!-- Variables de implantación -->
+  <div class="card mb24">
+    <div class="bt">Variables de implantación — determinantes de localización</div>
+    <div class="var-grid">
+      <div class="var-card var-border" style="border-top-color:var(--navy)">
+        <div class="var-icon">🏙️</div>
+        <div class="var-name">Radio de Influencia</div>
+        <div class="var-text">Cobertura interprovincial: Azuay, Cañar y Morona Santiago. Rango de acción: cantones a 30–60 min. en transporte público desde Cuenca. El campus actúa como nodo regional.</div>
+      </div>
+      <div class="var-card var-border" style="border-top-color:var(--navy2)">
+        <div class="var-icon">📍</div>
+        <div class="var-name">Localización</div>
+        <div class="var-text">Preferente en nodos urbanos con acceso a vías principales. Cuenca como nodo central por concentrar el 64,8% de la demanda y ser hub vial interprovincial de la Zona 6.</div>
+      </div>
+      <div class="var-card var-border" style="border-top-color:var(--steel)">
+        <div class="var-icon">🚌</div>
+        <div class="var-name">Accesibilidad</div>
+        <div class="var-text">Cercanía a vías principales y transporte público. Convergencia de rutas intercantonales e interprovinciales. Alta accesibilidad multimodal para captar demanda de las tres provincias.</div>
+      </div>
+      <div class="var-card var-border" style="border-top-color:var(--gold)">
+        <div class="var-icon">🏛️</div>
+        <div class="var-name">Jerarquía</div>
+        <div class="var-text">Equipamiento de nivel superior — mayor escala dentro del sistema PUGS. Clasificación zonal con radio de influencia nacional. Regulado por CES y acreditado por CEAACES.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico radar determinantes -->
+  <div class="g2">
+    <div class="card">
+      <div class="bt">Evaluación de determinantes — perfil de implantación requerido</div>
+      <div class="cw"><canvas id="chRadar"></canvas></div>
+      <p class="src"><strong>Fuente:</strong> PUGS Cuenca 2019 (ONU Habitat); INEC 2022; Secretaría de Planificación Zona 6, 2021</p>
+    </div>
+    <div class="card">
+      <div class="bt">Demanda potencial por grupo etario y escenario de captación</div>
+      <div class="cw"><canvas id="chCaptacion"></canvas></div>
+      <p class="src"><strong>Fuente:</strong> INEC 2022; CEPAL 2019; Tec. Azuay 2024 (400 nuevos est./ciclo); SENESCYT PRETT 2021</p>
+    </div>
+  </div>
+
+  <!-- Conclusión -->
+  <div class="concl">
+    <div class="concl-t">CONCLUSIONES DEL APARTADO 1</div>
+    <div class="concl-g">
+      <div>
+        <div class="concl-st">Diagnóstico territorial</div>
+        La Zona 6 concentra 195.753 jóvenes de 17–25 años (2022), proyectados a 203.577 en 2030.
+        La distribución asimétrica entre demanda estudiantil y oferta educativa — con Morona Santiago
+        como el territorio de mayor crecimiento y menor cobertura — define la urgencia de intervención.
+      </div>
+      <div>
+        <div class="concl-st">Justificación normativa</div>
+        El PUGS de Cuenca (GAD / ONU Habitat 2019) clasifica el proyecto como equipamiento
+        de nivel zonal con radio de influencia nacional. La LOES 2022 y el Acuerdo MinEduc 0483-12
+        proveen el marco regulatorio y los estándares mínimos de infraestructura aplicables.
+      </div>
+      <div>
+        <div class="concl-st">Cadena lógica</div>
+        La secuencia Población → Demanda → Déficit → Necesidad de Equipamiento valida
+        cuantitativamente la propuesta: 195.753 jóvenes generan una demanda técnica potencial
+        de 62.641 candidatos, frente a un déficit nacional de 153.697 sin cupo técnico (PRETT 2021).
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /cnt -->
+
+<!-- FOOTER -->
+<div class="ftr">
+  <div class="ftr-t">REFERENCIAS BIBLIOGRÁFICAS — APARTADO 01</div>
+  <div class="ftr-r">
+    <div>• INEC. (2024). Estimaciones y Proyecciones de Población, Revisión 2024 (EPP Rev. 2024). ecuadorencifras.gob.ec</div>
+    <div>• INEC. (2022). Censo de Población y Vivienda 2022. ecuadorencifras.gob.ec</div>
+    <div>• GAD Municipal Cuenca / ONU Habitat. (2019). Plan de Uso y Gestión del Suelo (PUGS) — Memoria Técnica. cuenca.gob.ec</div>
+    <div>• GAD Municipal Cuenca. (2021). Actualización PDOT — Diagnóstico y Modelo de Gestión. cuenca.gob.ec</div>
+    <div>• Ministerio de Educación Ecuador. (2021). Acuerdo N° 0483-12 — Normas Técnicas y Estándares de Infraestructura Educativa. educacion.gob.ec</div>
+    <div>• SENESCYT. (2021). Proyecto PRETT — Reconversión Educación Técnica y Tecnológica. educacionsuperior.gob.ec</div>
+    <div>• SENESCYT. (2022). Datos postulación y oferta académica Zona 6. admision.senescyt.gob.ec</div>
+    <div>• LOES. (2022). Ley Orgánica de Educación Superior Art. 19.1, 118, 356. Ecuador</div>
+    <div>• CES. (2023). Reglamento de Régimen Académico. ces.gob.ec</div>
+    <div>• Dirección de Planificación GAD Municipal de Cuenca. (2019). Publicado en PUGS Cuenca.</div>
+    <div>• El Mercurio Cuenca. (2022). Las carreras técnicas y tecnológicas, una opción para bachilleres. oct. 2022</div>
+    <div>• Expresate MS. (2025). Ecuador envejece: ranking de provincias con menos nacimientos. abr. 2025</div>
+  </div>
+</div>
+
+<script>
+/* ══ COLORES ══ */
+const N='#1B3A5C',N2='#2B4F76',ST='#4A6D8C',RD='#C0392B',GR='#27AE60',OR='#E67E22',GO='#D4A017';
+const CH={};
+
+function mkChart(id,cfg){
+  if(CH[id]){CH[id].destroy();delete CH[id]}
+  const c=document.getElementById(id)?.getContext('2d');
+  if(!c)return;
+  CH[id]=new Chart(c,cfg);
+}
+
+/* ══ PROVINCIAS DATA ══ */
+const provincias=[
+  {
+    id:0,nombre:'Azuay',icono:'🏙️',color:N,
+    total:'801.609',j2022:'126.895',j2030:'131.929',tasa:'0,49%',
+    confianza:'Media-alta',peso:'64,8%',rol:'PRIMARIO',
+    ciudades:'Cuenca (principal), Gualaceo, Paute, Santa Isabel, Sigsig',
+    caracteristicas:'Hub industrial, Patrimonio UNESCO, mayor concentración universitaria de la Zona 6. Cuenca concentra el 86% de la demanda de Azuay.',
+    carreras:'TI, Mercadotecnia, Construcción, Salud técnica',
+    fecundidad:'2,1 hijos/mujer (nivel de reemplazo)'
+  },
+  {
+    id:1,nombre:'Cañar',icono:'🏔️',color:ST,
+    total:'227.578',j2022:'34.592',j2030:'35.473',tasa:'0,32%',
+    confianza:'Media',peso:'17,7%',rol:'SECUNDARIO',
+    ciudades:'Azogues (capital), La Troncal, Cañar, Tambo',
+    caracteristicas:'Nodo secundario con UNAE y extensiones UCACUE. Fuerte identidad indígena y producción agrícola. Alta dependencia del nodo Cuenca para educación técnica.',
+    carreras:'Agropecuaria, Construcción, Turismo cultural',
+    fecundidad:'Información no disponible directamente'
+  },
+  {
+    id:2,nombre:'Morona Santiago',icono:'🌿',color:OR,
+    total:'192.508',j2022:'34.266',j2030:'36.175',tasa:'0,68%',
+    confianza:'Media-baja',peso:'17,5%',rol:'SPILLOVER',
+    ciudades:'Macas (capital), Sucúa, Limón Indanza, Gualaquiza',
+    caracteristicas:'Mayor tasa de crecimiento joven de la Zona 6. Mayor tasa de fecundidad (2,5 hijos/mujer, única que supera el nivel de reemplazo). Mínima oferta técnica. Sector amazónico con alto potencial agropecuario y ecoturístico.',
+    carreras:'Agropecuaria, Salud técnica, Turismo y ecoturismo',
+    fecundidad:'2,5 hijos/mujer — mayor de la Zona 6 (INEC 2024)'
+  }
+];
+
+let selectedProv=null;
+
+function renderProvincias(){
+  const grid=document.getElementById('provGrid');
+  if(!grid)return;
+  grid.innerHTML=provincias.map(p=>`
+    <div class="prov-card ${selectedProv===p.id?'active':''}"
+      style="border-top-color:${p.color}" onclick="selectProv(${p.id})">
+      <div class="prov-head" style="background:${p.color}">
+        <div class="prov-flag">${p.icono}</div>
+        <div class="prov-name">${p.nombre}</div>
+        <div class="prov-sub">ZONA 6 — ${p.peso} DE LA DEMANDA</div>
+      </div>
+      <div class="prov-body">
+        <div class="prov-stat"><span>Población total 2022</span><span class="prov-stat-v">${p.total}</span></div>
+        <div class="prov-stat"><span>Jóvenes 17–25 (2022)</span><span class="prov-stat-v">${p.j2022}</span></div>
+        <div class="prov-stat"><span>Proyección 2030</span><span class="prov-stat-v">${p.j2030}</span></div>
+        <div class="prov-stat"><span>Tasa crecimiento anual</span><span class="prov-stat-v">${p.tasa}</span></div>
+        <div class="prov-stat"><span>Rol en el campus</span>
+          <span class="prov-stat-v"><span class="badge" style="background:${p.color}">${p.rol}</span></span></div>
+        <div class="prov-bar-wrap">
+          <div class="prov-bar-label"><span>Peso en demanda Zona 6</span><span>${p.peso}</span></div>
+          <div class="prov-bar-track">
+            <div class="prov-bar" style="width:${p.peso};background:${p.color}"></div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function selectProv(id){
+  selectedProv=selectedProv===id?null:id;
+  renderProvincias();
+  const det=document.getElementById('provDetail');
+  if(selectedProv===null){det.style.display='none';return;}
+  const p=provincias.find(x=>x.id===id);
+  det.style.display='block';
+  det.style.borderLeftColor=p.color;
+  det.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:11px">
+      <div>
+        <div style="font-size:9px;font-weight:700;color:var(--steel);letter-spacing:1px;margin-bottom:5px">CIUDADES PRINCIPALES</div>
+        <div style="color:var(--text);line-height:1.65">${p.ciudades}</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;color:var(--steel);letter-spacing:1px;margin-bottom:5px">CARACTERÍSTICAS</div>
+        <div style="color:var(--text);line-height:1.65">${p.caracteristicas}</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;color:var(--steel);letter-spacing:1px;margin-bottom:5px">CARRERAS PRIORITARIAS</div>
+        <div style="color:var(--text);line-height:1.65;margin-bottom:8px">${p.carreras}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--steel);letter-spacing:1px;margin-bottom:3px">FECUNDIDAD</div>
+        <div style="color:var(--text);font-size:10px">${p.fecundidad}</div>
+      </div>
+    </div>`;
+}
+
+/* ══ COUNTERS ══ */
+function animateKPIs(){
+  document.querySelectorAll('[data-target]').forEach(el=>{
+    if(el.dataset.animated)return;
+    el.dataset.animated=1;
+    const target=parseFloat(el.dataset.target);
+    const dec=parseInt(el.dataset.dec||0);
+    const isInt=!!el.dataset.int;
+    let start=0,duration=1400,startTime=null;
+    function step(ts){
+      if(!startTime)startTime=ts;
+      const prog=Math.min((ts-startTime)/duration,1);
+      const ease=1-Math.pow(1-prog,3);
+      const val=start+ease*(target-start);
+      if(isInt)el.textContent=Math.floor(val).toLocaleString();
+      else el.textContent=dec?val.toFixed(dec):Math.floor(val);
+      if(prog<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+/* ══ CHARTS ══ */
+function drawChartsTab(t){
+  const tc='#4A5568',gc='#E2E8F0';
+  if(t===0){/* no charts */}
+  if(t===1){
+    // Proyección líneas
+    mkChart('chProyeccion',{type:'line',
+      data:{labels:['2022','2026','2030','2035'],
+        datasets:[
+          {label:'Azuay',data:[126895,129380,131929,135000],borderColor:N,backgroundColor:'rgba(27,58,92,.1)',
+            borderWidth:2.5,pointRadius:4,fill:true,tension:.35},
+          {label:'Cañar',data:[34592,35030,35473,35900],borderColor:ST,backgroundColor:'rgba(74,109,140,.1)',
+            borderWidth:2,pointRadius:4,fill:true,tension:.35},
+          {label:'Morona Santiago',data:[34266,35200,36175,37400],borderColor:OR,backgroundColor:'rgba(230,126,34,.1)',
+            borderWidth:2,pointRadius:4,fill:true,tension:.35}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:9},color:tc}}},
+        scales:{y:{grid:{color:gc},ticks:{callback:v=>`${(v/1000).toFixed(0)}k`,font:{size:9},color:tc}},
+          x:{grid:{display:false},ticks:{font:{size:10},color:tc}}}}});
+    // Tasas radar-like bars
+    mkChart('chTasas',{type:'bar',
+      data:{labels:['Azuay\n0,49%/año','Cañar\n0,32%/año','Morona Santiago\n0,68%/año','Zona 6\n0,49%/año'],
+        datasets:[
+          {label:'Tasa crecimiento 17–25 (× 100)',data:[49,32,68,49],
+            backgroundColor:[N,ST,OR,GO],borderRadius:6,label:'Tasa × 100'}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${(c.raw/100).toFixed(2)}%/año`}}},
+        scales:{y:{grid:{color:gc},ticks:{callback:v=>`${(v/100).toFixed(2)}%`,font:{size:9},color:tc}},
+          x:{grid:{display:false},ticks:{font:{size:8},color:tc}}}}}); 
+  }
+  if(t===2){
+    mkChart('chDistrib',{type:'doughnut',
+      data:{labels:['Azuay (64,8%)','Cañar (17,7%)','Morona Santiago (17,5%)'],
+        datasets:[{data:[64.8,17.7,17.5],backgroundColor:[N,ST,OR],borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}});
+    mkChart('chDesequilibrio',{type:'bar',
+      data:{labels:['Azuay','Cañar','Morona Santiago'],
+        datasets:[
+          {label:'% Demanda estudiantil',data:[64.8,17.7,17.5],backgroundColor:N+'CC',borderRadius:4},
+          {label:'% IES en Zona 6',data:[53.8,26.9,19.2],backgroundColor:OR+'CC',borderRadius:4}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:9},color:tc}}},
+        scales:{y:{max:80,ticks:{callback:v=>`${v}%`,font:{size:9},color:tc},grid:{color:gc}},
+          x:{grid:{display:false},ticks:{font:{size:10},color:tc}}}}});
+  }
+  if(t===4){
+    mkChart('chRadar',{type:'radar',
+      data:{labels:['Radio influencia','Centralidad','Accesibilidad','Proximidad pop.','Conectividad vial','Disponibilidad suelo'],
+        datasets:[
+          {label:'Requerimiento normativo',data:[90,80,90,85,85,70],borderColor:GO,backgroundColor:'rgba(212,160,23,.15)',borderWidth:2,pointRadius:4},
+          {label:'Perfil Cuenca (estimado)',data:[85,90,80,85,80,65],borderColor:N,backgroundColor:'rgba(27,58,92,.15)',borderWidth:2,pointRadius:4}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:9},color:tc}}},
+        scales:{r:{ticks:{stepSize:20,font:{size:7},color:tc},grid:{color:gc},pointLabels:{font:{size:9},color:tc}}}}});
+    mkChart('chCaptacion',{type:'bar',
+      data:{labels:['Pob. 17–25\nZona 6','Candidatos\ntécnicos (32%)','Captura\ncampus (18%)','Est. Fase 1\n(6 carr.)','Est. Fase\nmadura'],
+        datasets:[{data:[195753,62641,11275,480,1000],
+          backgroundColor:[N,N2,ST,GO,GR],borderRadius:4,label:'Estudiantes'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.toLocaleString()} personas`}}},
+        scales:{y:{grid:{color:gc},ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:9},color:tc}},
+          x:{grid:{display:false},ticks:{font:{size:8},color:tc,maxRotation:0}}}}});
+  }
+}
+
+/* ══ TAB SWITCH ══ */
+let activeTab=0;
+function switchTab(i){
+  document.querySelectorAll('.pnl').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  document.querySelectorAll('.tb').forEach((b,idx)=>b.classList.toggle('active',idx===i));
+  activeTab=i;
+  setTimeout(()=>drawChartsTab(i),60);
+  if(i===0)setTimeout(animateKPIs,200);
+}
+
+/* ══ INIT ══ */
+renderProvincias();
+drawChartsTab(0);
+setTimeout(animateKPIs,300);
+</script>
+</body>
+</html>
